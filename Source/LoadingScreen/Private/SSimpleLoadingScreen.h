@@ -7,6 +7,8 @@
 #include "LoadingScreenSettings.h"
 
 class FDeferredCleanupSlateBrush;
+class STextBlock;
+class SImage;
 
 class SSimpleLoadingScreen : public SCompoundWidget
 {
@@ -43,11 +45,11 @@ private:
 
 	double LastToolTipUpdate;
 	int CurrentToolTipIndex;
-	TSharedPtr<SWidget> CurrentToolTipWidget = SNullWidget::NullWidget;
-	TSharedPtr<SWidget> LoadingTextWidget = SNullWidget::NullWidget;
-	TSharedPtr<SWidget> DescriptionTextWidget = SNullWidget::NullWidget;
+	TSharedPtr<STextBlock> CurrentToolTipWidget;
+	TSharedPtr<STextBlock> LoadingTextWidget;
+	TSharedPtr<STextBlock> DescriptionTextWidget;
 	TSharedPtr<SWidget> ThrobberWidget = SNullWidget::NullWidget;
-	TSharedPtr<SWidget> BackgroundImageWidget = SNullWidget::NullWidget;
+	TSharedPtr<SImage> BackgroundImageWidget;
 
 	FLoadingScreenDescription ScreenDescriptionInfo;
 };

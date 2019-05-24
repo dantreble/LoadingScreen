@@ -68,7 +68,7 @@ void FLoadingScreenModule::ShutdownModule()
 {
 	if ( !IsRunningDedicatedServer() )
 	{
-		if (WidgetLoadingScreen.IsValid())
+		if (WidgetLoadingScreen)
 		{
 			WidgetLoadingScreen.Reset();
 		}				
@@ -94,7 +94,7 @@ void FLoadingScreenModule::HandleMovieClipFinished(const FString & FinishedClip)
 	GetMoviePlayer()->OnMovieClipFinished().RemoveAll(this);
 	
 	// Show the loading screen widget	
-	if (WidgetLoadingScreen.IsValid())
+	if (WidgetLoadingScreen)
 	{
 		WidgetLoadingScreen->HandleMoviesFinishedPlaying();
 	}
@@ -102,7 +102,7 @@ void FLoadingScreenModule::HandleMovieClipFinished(const FString & FinishedClip)
 
 void FLoadingScreenModule::BeginLoadingScreen(const FLoadingScreenDescription& ScreenDescription)
 {
-	if (WidgetLoadingScreen.IsValid())
+	if (WidgetLoadingScreen)
 	{
 		WidgetLoadingScreen.Reset();
 	}
@@ -116,12 +116,15 @@ void FLoadingScreenModule::BeginLoadingScreen(const FLoadingScreenDescription& S
 	LoadingScreen.PlaybackType = ScreenDescription.PlaybackType;
 
 
-	// Create and store widget
-	WidgetLoadingScreen = SNew(SSimpleLoadingScreen, ScreenDescription)
-		.bShowThrobber(ScreenDescription.Throbber.bShowThrobber)
-		.ThrobberType(ScreenDescription.Throbber.ThrobberType)
-		;
-	LoadingScreen.WidgetLoadingScreen = WidgetLoadingScreen;
+	if (ScreenDescription.bShowWidget)
+	{
+		// Create and store widget
+		WidgetLoadingScreen = SNew(SSimpleLoadingScreen, ScreenDescription)
+			.bShowThrobber(ScreenDescription.Throbber.bShowThrobber)
+			.ThrobberType(ScreenDescription.Throbber.ThrobberType)
+			;
+		LoadingScreen.WidgetLoadingScreen = WidgetLoadingScreen;
+	}
 
 	// Incase we have no movie paths, this will force it to show the loading screen anyway
 	if (LoadingScreen.MoviePaths.Num() == 0)
@@ -129,7 +132,10 @@ void FLoadingScreenModule::BeginLoadingScreen(const FLoadingScreenDescription& S
 		// Forces the movie player to create a movie streamer to actually show the widget and such
 		LoadingScreen.MoviePaths.Add("");	
 
-		WidgetLoadingScreen->HandleMoviesFinishedPlaying();
+		if (WidgetLoadingScreen)
+		{
+			WidgetLoadingScreen->HandleMoviesFinishedPlaying();
+		}
 	}
 	// If we have movies to show, then setup what happens if we're supposed to show ui otherwise skip this
 	else

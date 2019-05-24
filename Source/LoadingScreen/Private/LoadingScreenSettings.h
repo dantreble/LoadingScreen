@@ -182,9 +182,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tips")
 	FLoadingScreenSlotPosition SlotPosition;
 
-	/** The intended time between tips before it automatically switches to a new tip */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tips")
-		float TimeBetweenTips;
+	/** The intended time between tips before it automatically switches to a new tip, anything below zero will cause the tips to not change. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tips", meta = (ClampMin = "0"))
+		int TimeBetweenTips; // Using an integer because letting people be able to get it really low might be bad...
 
 	/** The tips to display on the load screen */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tips", meta =(MultiLine = "true"))
@@ -200,6 +200,10 @@ struct LOADINGSCREEN_API FLoadingScreenDescription
 public:
 
 	FLoadingScreenDescription();
+
+	/** Flag for showing any ui elements and images if true(incase you only want to show movies and thats it then set this to false) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Screens|Loading")
+		bool bShowWidget;
 
 	/** The minimum time that a loading screen should be opened for, -1 if there is no minimum time. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Screens|Loading")
@@ -227,7 +231,7 @@ public:
 
 	/**  Should we show the throbber/loading text etc?  Generally you'll want to set this to false if you just want to show a movie. This will render over any movie/background image. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Screens|UI")
-		bool bShowUIOverlay;
+		bool bShowUiOverlay;
 
 	/** Flag for showing UI after all movies have been played successfully if true. False will show during movies. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Screens|UI", meta = (EditCondition = "bShowUIOverlay"))

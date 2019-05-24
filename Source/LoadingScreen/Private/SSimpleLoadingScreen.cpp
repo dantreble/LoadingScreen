@@ -42,7 +42,7 @@ void SSimpleLoadingScreen::Construct(const FArguments& InArgs, const FLoadingScr
 	ScreenDescriptionInfo = InScreenDescription;
 
 	// Only show on construct if UI is true and we're not showing it after movies
-	const bool bShowUiOnConstruct = (ScreenDescriptionInfo.bShowUIOverlay && !ScreenDescriptionInfo.bShowUiAfterMovies);
+	const bool bShowUiOnConstruct = (ScreenDescriptionInfo.bShowUiOverlay && !ScreenDescriptionInfo.bShowUiAfterMovies);
 	bShowThrobber = InArgs._bShowThrobber;
 	ThrobberType = InArgs._ThrobberType;	
 
@@ -114,11 +114,14 @@ void SSimpleLoadingScreen::Construct(const FArguments& InArgs, const FLoadingScr
 		}
 		}
 				
-		// Handles flipping the widget if needed
-		ThrobberWidget->SetRenderTransformPivot(FVector2D(0.5f, 0.5f));
-		const float ThrobberScale = (float)((ScreenDescriptionInfo.Throbber.bFlipThrobberAnimation) ? -1 : 1);
-		ThrobberWidget->SetRenderTransform(FSlateRenderTransform(FScale2D(ThrobberScale, 1.0f)));
-		ThrobberWidget->SetVisibility((bShowThrobber && bShowUiOnConstruct) ? EVisibility::SelfHitTestInvisible : EVisibility::Hidden);
+		if (ThrobberWidget)
+		{
+			// Handles flipping the widget if needed
+			ThrobberWidget->SetRenderTransformPivot(FVector2D(0.5f, 0.5f));
+			const float ThrobberScale = (float)((ScreenDescriptionInfo.Throbber.bFlipThrobberAnimation) ? -1 : 1);
+			ThrobberWidget->SetRenderTransform(FSlateRenderTransform(FScale2D(ThrobberScale, 1.0f)));
+			ThrobberWidget->SetVisibility((bShowThrobber && bShowUiOnConstruct) ? EVisibility::SelfHitTestInvisible : EVisibility::Hidden);
+		}
 	}
 
 	// Handles creating the tip text widget
@@ -224,15 +227,24 @@ void SSimpleLoadingScreen::Construct(const FArguments& InArgs, const FLoadingScr
 
 void SSimpleLoadingScreen::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
 {		
-	if ((InCurrentTime - LastToolTipUpdate) > ScreenDescriptionInfo.LoadingScreenTips.TimeBetweenTips)
+	const int TipDelay = ScreenDescriptionInfo.LoadingScreenTips.TimeBetweenTips;
+
+	// Dont continue if the delay time is at zero
+	if (TipDelay == 0)
 	{
+		return;
+	}
+	// If the time between now and last tooltip update is longer than the intended delay
+	else if ((InCurrentTime - LastToolTipUpdate) > TipDelay)
+	{
+		// Record the time
 		LastToolTipUpdate = InCurrentTime;
 
-		// Safety check that it is a textblock and not something else
-		if (CurrentToolTipWidget->GetType() == "STextBlock")
+		// Valid check
+		if (CurrentToolTipWidget)
 		{
-			STextBlock* TextBlock = static_cast<STextBlock*>(&CurrentToolTipWidget.ToSharedRef().Get());
-			TextBlock->SetText(GetRandomToolTip());
+			// Update the text to a new random tool tip
+			CurrentToolTipWidget->SetText(GetRandomToolTip());
 		}		
 	}
 }
@@ -242,19 +254,41 @@ void SSimpleLoadingScreen::HandleMoviesFinishedPlaying()
 	// Show the background if we're allowed to
 	if (ScreenDescriptionInfo.bShowImagesAfterMovies)
 	{
-		BackgroundImageWidget->SetVisibility(EVisibility::SelfHitTestInvisible);
+		if (BackgroundImageWidget)
+		{			
+			BackgroundImageWidget->SetVisibility(EVisibility::SelfHitTestInvisible);
+		}
 	}
 
 	// Show ui elements if we're showing ui and we can show it after movies
-	if (ScreenDescriptionInfo.bShowUiAfterMovies && ScreenDescriptionInfo.bShowUIOverlay)
+	if (ScreenDescriptionInfo.bShowUiAfterMovies && ScreenDescriptionInfo.bShowUiOverlay)
 	{
-		ThrobberWidget->SetVisibility(ScreenDescriptionInfo.Throbber.bShowThrobber ? EVisibility::SelfHitTestInvisible : EVisibility::Hidden);
+		if (ThrobberWidget)
+		{
+			ThrobberWidget->SetVisibility(ScreenDescriptionInfo.Throbber.bShowThrobber 
+				? EVisibility::SelfHitTestInvisible : EVisibility::Hidden);
+		}
 
-		LoadingTextWidget->SetVisibility(ScreenDescriptionInfo.LoadingScreenText.SlotText.bShouldShowText ? EVisibility::SelfHitTestInvisible : EVisibility::Hidden);
+		if (LoadingTextWidget)
+		{
+			LoadingTextWidget->SetVisibility(ScreenDescriptionInfo.LoadingScreenText.SlotText.bShouldShowText 
+				? EVisibility::SelfHitTestInvisible : EVisibility::Hidden);
+		}
 
-		DescriptionTextWidget->SetVisibility(ScreenDescriptionInfo.LoadingScreenDescription.SlotText.bShouldShowText ? EVisibility::SelfHitTestInvisible : EVisibility::Hidden);
+		if (DescriptionTextWidget)
+		{
+			DescriptionTextWidget->SetVisibility(ScreenDescriptionInfo.LoadingScreenDescription.SlotText.bShouldShowText 
+				? EVisibility::SelfHitTestInvisible : EVisibility::Hidden);
+		}
 
-		CurrentToolTipWidget->SetVisibility(ScreenDescriptionInfo.LoadingScreenTips.SlotText.bShouldShowText ? EVisibility::SelfHitTestInvisible : EVisibility::Hidden);
+		if (CurrentToolTipWidget)
+		{
+			// Reset the time so incase if when we're visible its not shorter than its supposed to be
+			LastToolTipUpdate = FSlateApplication::Get().GetCurrentTime();
+
+			CurrentToolTipWidget->SetVisibility(ScreenDescriptionInfo.LoadingScreenTips.SlotText.bShouldShowText 
+				? EVisibility::SelfHitTestInvisible : EVisibility::Hidden);
+		}
 	}
 }
 
@@ -267,7 +301,6 @@ float SSimpleLoadingScreen::GetDPIScale() const
 
 FText SSimpleLoadingScreen::GetRandomToolTip() 
 {	
-
 	// Decides a random tip to show
 	{
 		const int32 Total = ScreenDescriptionInfo.LoadingScreenTips.Tips.Num();
