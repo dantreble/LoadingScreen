@@ -127,7 +127,9 @@ void FLoadingScreenModule::BeginLoadingScreen(const FLoadingScreenDescription& S
 	if (LoadingScreen.MoviePaths.Num() == 0)
 	{
 		// Forces the movie player to create a movie streamer to actually show the widget and such
-		LoadingScreen.MoviePaths.Add("");		
+		LoadingScreen.MoviePaths.Add("");	
+
+		WidgetLoadingScreen->HandleMoviesFinishedPlaying();
 	}
 	// If we have movies to show, then setup what happens if we're supposed to show ui otherwise skip this
 	else

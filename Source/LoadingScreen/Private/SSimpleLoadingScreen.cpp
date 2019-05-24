@@ -224,7 +224,7 @@ void SSimpleLoadingScreen::Construct(const FArguments& InArgs, const FLoadingScr
 
 void SSimpleLoadingScreen::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
 {		
-	if ((InCurrentTime - LastToolTipUpdate) > 5.0f)
+	if ((InCurrentTime - LastToolTipUpdate) > ScreenDescriptionInfo.LoadingScreenTips.TimeBetweenTips)
 	{
 		LastToolTipUpdate = InCurrentTime;
 

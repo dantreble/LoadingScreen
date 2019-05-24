@@ -47,7 +47,8 @@ FLoadingScreenThrobber::FLoadingScreenThrobber()
 
 FLoadingScreenTips::FLoadingScreenTips()
 	: SlotText(FLoadingScreenSlotText())
-	, SlotPosition(FLoadingScreenSlotPosition())	
+	, SlotPosition(FLoadingScreenSlotPosition())
+	, TimeBetweenTips(10.0f)
 { }
 
 FLoadingScreenDescription::FLoadingScreenDescription()
