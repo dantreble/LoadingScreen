@@ -114,14 +114,11 @@ void SSimpleLoadingScreen::Construct(const FArguments& InArgs, const FLoadingScr
 		}
 		}
 				
-		if (ThrobberWidget)
-		{
 			// Handles flipping the widget if needed
 			ThrobberWidget->SetRenderTransformPivot(FVector2D(0.5f, 0.5f));
 			const float ThrobberScale = (float)((ScreenDescriptionInfo.Throbber.bFlipThrobberAnimation) ? -1 : 1);
 			ThrobberWidget->SetRenderTransform(FSlateRenderTransform(FScale2D(ThrobberScale, 1.0f)));
-			ThrobberWidget->SetVisibility((bShowThrobber && bShowUiOnConstruct) ? EVisibility::SelfHitTestInvisible : EVisibility::Hidden);
-		}
+			ThrobberWidget->SetVisibility((bShowThrobber && bShowUiOnConstruct) ? EVisibility::SelfHitTestInvisible : EVisibility::Hidden);		
 	}
 
 	// Handles creating the tip text widget
@@ -138,7 +135,8 @@ void SSimpleLoadingScreen::Construct(const FArguments& InArgs, const FLoadingScr
 			.Justification(ScreenDescriptionInfo.LoadingScreenTips.SlotText.TextJustification)
 			.Text(ScreenDescriptionInfo.LoadingScreenTips.Tips[CurrentToolTipIndex]);
 		
-		LastToolTipUpdate = FSlateApplication::Get().GetCurrentTime();
+		LastToolTipUpdate = FPlatformTime::Seconds();
+
 	}
 
 	// Construct Description Text
@@ -226,7 +224,7 @@ void SSimpleLoadingScreen::Construct(const FArguments& InArgs, const FLoadingScr
 }
 
 void SSimpleLoadingScreen::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
-{		
+{	
 	const int TipDelay = ScreenDescriptionInfo.LoadingScreenTips.TimeBetweenTips;
 
 	// Dont continue if the delay time is at zero
@@ -282,9 +280,10 @@ void SSimpleLoadingScreen::HandleMoviesFinishedPlaying()
 		}
 
 		if (CurrentToolTipWidget)
-		{
+		{					
 			// Reset the time so incase if when we're visible its not shorter than its supposed to be
-			LastToolTipUpdate = FSlateApplication::Get().GetCurrentTime();
+			LastToolTipUpdate = FPlatformTime::Seconds();
+		
 
 			CurrentToolTipWidget->SetVisibility(ScreenDescriptionInfo.LoadingScreenTips.SlotText.bShouldShowText 
 				? EVisibility::SelfHitTestInvisible : EVisibility::Hidden);
@@ -301,7 +300,7 @@ float SSimpleLoadingScreen::GetDPIScale() const
 
 FText SSimpleLoadingScreen::GetRandomToolTip() 
 {	
-	// Decides a random tip to show
+	// Decides a random tip to show thats not the current tooltip
 	{
 		const int32 Total = ScreenDescriptionInfo.LoadingScreenTips.Tips.Num();
 		int32 RandomTip = FMath::RandRange(0, Total - 1);
