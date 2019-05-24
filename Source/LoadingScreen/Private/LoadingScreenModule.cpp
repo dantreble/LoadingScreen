@@ -126,7 +126,7 @@ void FLoadingScreenModule::BeginLoadingScreen(const FLoadingScreenDescription& S
 		LoadingScreen.WidgetLoadingScreen = WidgetLoadingScreen;
 	}
 
-	bool IsPlayingValidMovies = LoadingScreen.MoviePaths.Num() != 0;
+	const bool IsPlayingValidMovies = LoadingScreen.MoviePaths.Num() != 0;
 	// Incase we have no movie paths, this will force it to show the loading screen anyway
 	if (!IsPlayingValidMovies)
 	{
