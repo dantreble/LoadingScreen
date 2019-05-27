@@ -26,8 +26,7 @@
 // SSimpleLoadingScreen
 
 static float PointSizeToSlateUnits(float PointSize)
-{
-	//FreeTypeConstants::HorizontalDPI = 96;
+{	
 	const float SlateFreeTypeHorizontalResolutionDPI = 96.0f;
 	const float FreeTypeNativeDPI = 72.0f;
 	const float PixelSize = PointSize * (SlateFreeTypeHorizontalResolutionDPI / FreeTypeNativeDPI);
@@ -86,10 +85,7 @@ void SSimpleLoadingScreen::Construct(const FArguments& InArgs, const FLoadingScr
 		{
 		case EThrobberLoadingType::TLT_Circular:
 		{
-			// Old comment information may be of use in the future
-				// Convert font size to pixels, pixel_size = point_size * resolution / 72, then half it to get radius
-				// (Settings->LoadingFont.Size * 96.0f / 72.0f) / 2.0f
-
+			// Construct circular throbber
 			ThrobberWidget = SNew(SCircularThrobber)
 				.Radius(ScreenDescriptionInfo.Throbber.ThrobberRadius)
 				.Period(ScreenDescriptionInfo.Throbber.ThrobberPeriod)
@@ -100,12 +96,13 @@ void SSimpleLoadingScreen::Construct(const FArguments& InArgs, const FLoadingScr
 		case EThrobberLoadingType::TLT_Regular:
 		default:
 		{			
+			// Decide which animation to play for regular throbber
 			const int32 AnimationParams = (ScreenDescriptionInfo.Throbber.AnimateVertically ? SThrobber::Vertical : 0) |
 				(ScreenDescriptionInfo.Throbber.AnimateHorizontally ? SThrobber::Horizontal : 0) |
 				(ScreenDescriptionInfo.Throbber.AnimateOpacity ? SThrobber::Opacity : 0);
-
 			const SThrobber::EAnimation Animation = static_cast<SThrobber::EAnimation>(AnimationParams);
 
+			// Construct regular throbber
 			ThrobberWidget = SNew(SThrobber)
 				.Animate(Animation)
 				.NumPieces(ScreenDescriptionInfo.Throbber.NumPiecesThrobber)				
@@ -118,49 +115,52 @@ void SSimpleLoadingScreen::Construct(const FArguments& InArgs, const FLoadingScr
 			ThrobberWidget->SetRenderTransformPivot(FVector2D(0.5f, 0.5f));
 			const float ThrobberScale = (float)((ScreenDescriptionInfo.Throbber.bFlipThrobberAnimation) ? -1 : 1);
 			ThrobberWidget->SetRenderTransform(FSlateRenderTransform(FScale2D(ThrobberScale, 1.0f)));
+			// Show throbber if allowed
 			ThrobberWidget->SetVisibility((bShowThrobber && bShowUiOnConstruct) ? EVisibility::SelfHitTestInvisible : EVisibility::Hidden);		
 	}
+
+	// Construct tooltip widget
+	CurrentToolTipWidget = SNew(STextBlock)
+		.Visibility(EVisibility::Hidden) // Default to hidden just incase
+		.WrapTextAt(ScreenDescriptionInfo.LoadingScreenTips.SlotText.WrapAt)
+		.Font(ScreenDescriptionInfo.LoadingScreenTips.SlotText.Font)
+		.ColorAndOpacity(ScreenDescriptionInfo.LoadingScreenTips.SlotText.TextColor)
+		.Justification(ScreenDescriptionInfo.LoadingScreenTips.SlotText.TextJustification);
 
 	// Handles creating the tip text widget
 	if (ScreenDescriptionInfo.LoadingScreenTips.Tips.Num() > 0)
 	{					
+		// Decide tool tip to show
 		CurrentToolTipIndex = FMath::RandRange(0, ScreenDescriptionInfo.LoadingScreenTips.Tips.Num() - 1);
 		
-		CurrentToolTipWidget = SNew(STextBlock)
-			.Visibility((ScreenDescriptionInfo.LoadingScreenTips.SlotText.bShouldShowText && bShowUiOnConstruct) 
-				? EVisibility::SelfHitTestInvisible : EVisibility::Hidden)
-			.WrapTextAt(ScreenDescriptionInfo.LoadingScreenTips.SlotText.WrapAt)
-			.Font(ScreenDescriptionInfo.LoadingScreenTips.SlotText.Font)
-			.ColorAndOpacity(ScreenDescriptionInfo.LoadingScreenTips.SlotText.TextColor)
-			.Justification(ScreenDescriptionInfo.LoadingScreenTips.SlotText.TextJustification)
-			.Text(ScreenDescriptionInfo.LoadingScreenTips.Tips[CurrentToolTipIndex]);
-		
-		LastToolTipUpdate = FPlatformTime::Seconds();
+		// Update the text
+		CurrentToolTipWidget->SetText(ScreenDescriptionInfo.LoadingScreenTips.Tips[CurrentToolTipIndex]);
+		// Show tooltip widget if allowed
+		CurrentToolTipWidget->SetVisibility((ScreenDescriptionInfo.LoadingScreenTips.SlotText.bShouldShowText && bShowUiOnConstruct)
+			? EVisibility::SelfHitTestInvisible : EVisibility::Hidden);
 
+		// For deciding the time between tooltips
+		LastToolTipUpdate = FPlatformTime::Seconds();
 	}
 
 	// Construct Description Text
-	{
-		DescriptionTextWidget = SNew(STextBlock)
-			.Text(ScreenDescriptionInfo.LoadingScreenDescription.Text)
-			.Font(ScreenDescriptionInfo.LoadingScreenDescription.SlotText.Font)
-			.ColorAndOpacity(ScreenDescriptionInfo.LoadingScreenDescription.SlotText.TextColor)
-			.Justification(ScreenDescriptionInfo.LoadingScreenDescription.SlotText.TextJustification)
-			.WrapTextAt(ScreenDescriptionInfo.LoadingScreenDescription.SlotText.WrapAt)
-			.Visibility((ScreenDescriptionInfo.LoadingScreenDescription.SlotText.bShouldShowText && bShowUiOnConstruct)
-				? EVisibility::SelfHitTestInvisible : EVisibility::Hidden);
-	}
+	DescriptionTextWidget = SNew(STextBlock)
+		.Text(ScreenDescriptionInfo.LoadingScreenDescription.Text)
+		.Font(ScreenDescriptionInfo.LoadingScreenDescription.SlotText.Font)
+		.ColorAndOpacity(ScreenDescriptionInfo.LoadingScreenDescription.SlotText.TextColor)
+		.Justification(ScreenDescriptionInfo.LoadingScreenDescription.SlotText.TextJustification)
+		.WrapTextAt(ScreenDescriptionInfo.LoadingScreenDescription.SlotText.WrapAt)
+		.Visibility((ScreenDescriptionInfo.LoadingScreenDescription.SlotText.bShouldShowText && bShowUiOnConstruct)
+			? EVisibility::SelfHitTestInvisible : EVisibility::Hidden);
 
-	// Construct Loading text	
-	{
-		LoadingTextWidget = SNew(STextBlock)
-			.Text(ScreenDescriptionInfo.LoadingScreenText.Text)
-			.Font(ScreenDescriptionInfo.LoadingScreenText.SlotText.Font)
-			.ColorAndOpacity(ScreenDescriptionInfo.LoadingScreenText.SlotText.TextColor)
-			.Justification(ScreenDescriptionInfo.LoadingScreenText.SlotText.TextJustification)
-			.Visibility((ScreenDescriptionInfo.LoadingScreenText.SlotText.bShouldShowText && bShowUiOnConstruct)
-				? EVisibility::SelfHitTestInvisible : EVisibility::Hidden);
-	}
+	// Construct Loading text		
+	LoadingTextWidget = SNew(STextBlock)
+		.Text(ScreenDescriptionInfo.LoadingScreenText.Text)
+		.Font(ScreenDescriptionInfo.LoadingScreenText.SlotText.Font)
+		.ColorAndOpacity(ScreenDescriptionInfo.LoadingScreenText.SlotText.TextColor)
+		.Justification(ScreenDescriptionInfo.LoadingScreenText.SlotText.TextJustification)
+		.Visibility((ScreenDescriptionInfo.LoadingScreenText.SlotText.bShouldShowText && bShowUiOnConstruct)
+			? EVisibility::SelfHitTestInvisible : EVisibility::Hidden);	
 
 	// Adds a slot to the root of this widget to allow for other widgets to be added to it, renders over image/movie
 	Root->AddSlot()
@@ -225,6 +225,12 @@ void SSimpleLoadingScreen::Construct(const FArguments& InArgs, const FLoadingScr
 
 void SSimpleLoadingScreen::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
 {	
+	// Dont continue if we only have 1 tip to show
+	if (ScreenDescriptionInfo.LoadingScreenTips.Tips.Num() == 1)
+	{
+		return;
+	}
+	
 	const int TipDelay = ScreenDescriptionInfo.LoadingScreenTips.TimeBetweenTips;
 
 	// Dont continue if the delay time is at zero
@@ -279,7 +285,8 @@ void SSimpleLoadingScreen::HandleMoviesFinishedPlaying()
 				? EVisibility::SelfHitTestInvisible : EVisibility::Hidden);
 		}
 
-		if (CurrentToolTipWidget)
+		// Only show tooltip widget if we have any tips to show
+		if (CurrentToolTipWidget && ScreenDescriptionInfo.LoadingScreenTips.Tips.Num() != 0)
 		{					
 			// Reset the time so incase if when we're visible its not shorter than its supposed to be
 			LastToolTipUpdate = FPlatformTime::Seconds();
