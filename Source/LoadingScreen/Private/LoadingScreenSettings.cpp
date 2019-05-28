@@ -43,6 +43,8 @@ FLoadingScreenThrobber::FLoadingScreenThrobber()
 	, AnimateOpacity(true)
 	, ThrobberPeriod(0.75f)
 	, ThrobberRadius(16.0f)
+	, ImageBrush(*FCoreStyle::Get().GetDefaultBrush())
+	, ImageColorAndOpacity(FLinearColor::White)
 { }
 
 FLoadingScreenTips::FLoadingScreenTips()

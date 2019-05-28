@@ -86,15 +86,16 @@ void SSimpleLoadingScreen::Construct(const FArguments& InArgs, const FLoadingScr
 		case EThrobberLoadingType::TLT_Circular:
 		{
 			// Construct circular throbber
-			ThrobberWidget = SNew(SCircularThrobber)
+			TSharedPtr<SCircularThrobber> ConstructedThrobber = SNew(SCircularThrobber)
 				.Radius(ScreenDescriptionInfo.Throbber.ThrobberRadius)
 				.Period(ScreenDescriptionInfo.Throbber.ThrobberPeriod)
 				.NumPieces(ScreenDescriptionInfo.Throbber.NumPiecesThrobber)				
 				.PieceImage(&ScreenDescriptionInfo.Throbber.ThrobberImage);
+
+			ThrobberWidget = ConstructedThrobber;
 			break;
 		}
-		case EThrobberLoadingType::TLT_Regular:
-		default:
+		case EThrobberLoadingType::TLT_Regular:		
 		{			
 			// Decide which animation to play for regular throbber
 			const int32 AnimationParams = (ScreenDescriptionInfo.Throbber.AnimateVertically ? SThrobber::Vertical : 0) |
@@ -103,18 +104,38 @@ void SSimpleLoadingScreen::Construct(const FArguments& InArgs, const FLoadingScr
 			const SThrobber::EAnimation Animation = static_cast<SThrobber::EAnimation>(AnimationParams);
 
 			// Construct regular throbber
-			ThrobberWidget = SNew(SThrobber)
+			TSharedPtr<SThrobber> ConstructedThrobber = SNew(SThrobber)
 				.Animate(Animation)
 				.NumPieces(ScreenDescriptionInfo.Throbber.NumPiecesThrobber)				
 				.PieceImage(&ScreenDescriptionInfo.Throbber.ThrobberImage);
+
+			ThrobberWidget = ConstructedThrobber;
+			break;
+		}
+		case EThrobberLoadingType::TLT_Image:
+		default:
+		{
+			// Setup image to show
+			const FSlateBrush* ImageBrush = &ScreenDescriptionInfo.Throbber.ImageBrush;
+
+			// Construct an image in place of throbber
+			TSharedPtr<SImage> ConstructedImage = SNew(SImage)
+				.Image(ImageBrush)
+				.ColorAndOpacity(ScreenDescriptionInfo.Throbber.ImageColorAndOpacity);
+
+			ThrobberWidget = ConstructedImage;
 			break;
 		}
 		}
 				
-			// Handles flipping the widget if needed
+		// Only adjust the the scaling if we're not using an image
+		if (ThrobberType != EThrobberLoadingType::TLT_Image)
+		{
+			// Handles flipping the throbber if needed
 			ThrobberWidget->SetRenderTransformPivot(FVector2D(0.5f, 0.5f));
 			const float ThrobberScale = (float)((ScreenDescriptionInfo.Throbber.bFlipThrobberAnimation) ? -1 : 1);
 			ThrobberWidget->SetRenderTransform(FSlateRenderTransform(FScale2D(ThrobberScale, 1.0f)));
+		}
 			// Show throbber if allowed
 			ThrobberWidget->SetVisibility((bShowThrobber && bShowUiOnConstruct) ? EVisibility::SelfHitTestInvisible : EVisibility::Hidden);		
 	}

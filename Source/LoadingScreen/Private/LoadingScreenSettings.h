@@ -15,8 +15,12 @@
 UENUM(BlueprintType)
 enum class EThrobberLoadingType : uint8
 {
+	/** Uses a regular throbber to indicate loading */
 	TLT_Regular UMETA(DisplayName = "Regular"),
-	TLT_Circular UMETA(DisplayName = "Circular")
+	/** Uses a circular throbber to indicate loading */
+	TLT_Circular UMETA(DisplayName = "Circular"),
+	/** Uses an image instead of a throbber type incase you want to use an image with a material or something to indicate loading */
+	TLT_Image UMETA(DisplayName = "Image")
 };
 
 USTRUCT(BlueprintType)
@@ -162,6 +166,14 @@ public:
 	/** The radius of the circle */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Circular", meta = (EditCondition = "bShowThrobber"))
 		float ThrobberRadius;
+
+	/** Image to draw (adjust image size here to adjust the size in X and Y) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Image", meta = (EditCondition = "bShowThrobber"))
+		FSlateBrush ImageBrush;
+
+	/** Color and opacity */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Image", meta = (EditCondition = "bShowThrobber", sRGB = "true"))
+		FLinearColor ImageColorAndOpacity;
 
 };
 
