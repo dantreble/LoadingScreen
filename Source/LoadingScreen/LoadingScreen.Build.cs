@@ -9,9 +9,10 @@ namespace UnrealBuildTool.Rules
         {
             PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-            PrivateIncludePaths.Add("LoadingScreen/Private");
+            PublicIncludePaths.Add(Path.Combine(ModuleDirectory, "Public"));
+            PrivateIncludePaths.Add(Path.Combine(ModuleDirectory, "Private"));
 
-			PublicDependencyModuleNames.AddRange(
+            PublicDependencyModuleNames.AddRange(
 				new string[]
 				{
 					"Core",
