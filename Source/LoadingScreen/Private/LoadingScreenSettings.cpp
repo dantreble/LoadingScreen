@@ -1,7 +1,7 @@
 // Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
 
 #include "LoadingScreenSettings.h"
-#include "CoreStyle.h"
+#include "Styling/CoreStyle.h"
 #include "Engine/Font.h"
 #include "UObject/ConstructorHelpers.h"
 

@@ -3,11 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Anchors.h"
+#include "Widgets/Layout/Anchors.h"
 #include "Fonts/SlateFontInfo.h"
 #include "MoviePlayer.h"
-#include "SScaleBox.h"
-#include "TextLayout.h"
+#include "Widgets/Layout/SScaleBox.h"
+#include "Framework/Text/TextLayout.h"
 #include "Engine/DeveloperSettings.h"
 
 #include "LoadingScreenSettings.generated.h"
