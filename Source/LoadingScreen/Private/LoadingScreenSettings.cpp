@@ -9,8 +9,8 @@
 
 FLoadingScreenSlotPosition::FLoadingScreenSlotPosition()
 	: Anchors(0.5f)
-	, Offset(NoInit)
-	, Alignment(NoInit)
+	, Offset(ForceInit)
+	, Alignment(ForceInit)
 { }
 
 FLoadingScreenSlotText::FLoadingScreenSlotText()
@@ -59,6 +59,7 @@ FLoadingScreenDescription::FLoadingScreenDescription()
 	, bAutoCompleteWhenLoadingCompletes(true)
 	, bMoviesAreSkippable(true)
 	, bWaitForManualStop(false)	
+	, PlaybackType(EMoviePlaybackType::MT_Normal)
 	, bShowUiOverlay(true)
 	, bShowUiAfterMovies(true)
 	, Throbber(FLoadingScreenThrobber())
