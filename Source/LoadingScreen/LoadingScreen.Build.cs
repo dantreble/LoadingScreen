@@ -21,6 +21,7 @@ public class LoadingScreen : ModuleRules
         PrivateDependencyModuleNames.AddRange(
             new string[] {
                     "CoreUObject",
+                    "DeveloperSettings",
                     "MoviePlayer",
                     "Slate",
                     "SlateCore",
